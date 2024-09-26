@@ -1,0 +1,14 @@
+#Download and Install ollama from https://ollama.com/
+#Ensure ollama service is running before executing this code
+#From ollama pull nomic-embed-text and llama3
+
+#Following are libraries pre-requisit in your python environment
+import streamlit as st
+from PyPDF2 import PdfReader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.llms import Ollama
+from langchain_ollama import OllamaEmbeddings
+import chromadb
+import numpy
+import uuid
+import requests
