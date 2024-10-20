@@ -11,4 +11,3 @@ from langchain_ollama import OllamaEmbeddings
 import chromadb
 import numpy
 import uuid
-import requests

@@ -7,13 +7,6 @@ from langchain_ollama import OllamaEmbeddings
 import chromadb
 import numpy
 import uuid
-import requests
-
-res = requests.post('http://localhost:11434/api/embeddings',
-                    json={
-                        'model': 'nomic-embed-text',
-                        'prompt': 'Hello world'
-                    })
 
 
 st.title("Chat BOT!!!")
@@ -26,15 +19,15 @@ if uploaded_file is not None:
             with st.spinner("Generating Response..."):
 
                 # Parameters
-                DIMENSION = len(res.json()['embedding'])  # 768 dimensions for nomic-embed-text embedding model
                 EXTRACTED_TEXT_FILE_PATH = "pdf_txt.txt"  # text extracted from pdf
                 PDF_FILE_PATH = uploaded_file
                 CHUNK_SIZE = 150  # chunk size to create snippets
                 CHUNK_OVERLAP = 20  # check size to create overlap between snippets
-                OUTPUT_RESULT_COUNT = 5  # results of chunk from vector database.
+                OUTPUT_RESULT_COUNT = 3  # results of chunk from vector database.
 
                 # initialize chroma DB
                 chroma_client = chromadb.Client()
+                #chromadb.api.client.SharedSystemClient.clear_system_cache()
                 collection = chroma_client.get_or_create_collection(name="test_chat_nomic")
 
                 # Initialize Ollama-embeddings and test:
@@ -42,17 +35,13 @@ if uploaded_file is not None:
                     OllamaEmbeddings(model="nomic-embed-text")
                 )
 
-                embedding = embeddings.embed_query("Hello World")
-                dimension = len(embedding)
 
-
-                # Exract text from PDF
+                # Extract text from PDF
                 def extract_text_from_pdf(file_path: str):
                     # Open the PDF file using the specified file_path
                     reader = PdfReader(file_path)
                     # Get the total number of pages in the PDF
                     number_of_pages = len(reader.pages)
-
                     # Initialize an empty string to store extracted text
                     pdf_text = ""
 
@@ -87,13 +76,10 @@ if uploaded_file is not None:
 
                     # Split the text into snippets using the specified settings
                     snippets = text_splitter.split_text(file_text)
-                    # print(len(snippets))
-
-                    x = numpy.zeros((len(snippets), dimension), dtype='float32')
+                    x = numpy.zeros((len(snippets), 768), dtype='float32')
                     ids = []
 
                     for i, snippet in enumerate(snippets):
-                        # print(snippet)
                         embedding = embeddings.embed_query(snippet)
                         ids.append(get_uuid())
                         x[i] = numpy.array(embedding)
